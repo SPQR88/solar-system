@@ -1,0 +1,77 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+#container {
+    position: relative;
+    width: 800px;
+    height: 800px;
+}
+
+#container .orbit {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid black;
+    box-sizing: border-box;
+}
+#container .orbit:hover {
+    border: 3px solid black!important;
+}
+
+#container .orbit-pd {
+    position: absolute;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+
+#container #mars-orbit {
+    z-index: 40;
+}
+
+#container #mars-orbit div {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: red;
+    z-index: 41;
+}
+
+#container #mars-orbit-pd {
+    z-index: 41;
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+
+#container #jupiter-orbit {
+    z-index: 10;
+}
+
+#container #jupiter-orbit div {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffb25c;
+    z-index: 11;
+}
+
+#container #jupiter-orbit-pd {
+    z-index: 11;
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+
+#container #sun {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: yellow;
+    top: 390px;
+    left: 390px;
+    z-index: 1000;
+}
