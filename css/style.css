@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 #container {
@@ -29,9 +30,12 @@
 
 #container #mars-orbit {
     z-index: 40;
+    position: absolute;
+    border: 1px solid black!important;
+    border-radius: 50%;
 }
 
-#container #mars-orbit div {
+#container #mars {
     position: absolute;
     width: 6px;
     height: 6px;
@@ -48,12 +52,13 @@
 
 #container #jupiter-orbit {
     z-index: 10;
+    position: absolute;
+    border: 1px solid black!important;
+    border-radius: 50%;
 }
 
-#container #jupiter-orbit div {
+#container #jupiter {
     position: absolute;
-    width: 10px;
-    height: 10px;
     border-radius: 50%;
     background: #ffb25c;
     z-index: 11;
@@ -67,8 +72,8 @@
 
 #container #sun {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
     border-radius: 50%;
     background: yellow;
     top: 390px;
