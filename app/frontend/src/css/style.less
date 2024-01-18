@@ -10,13 +10,14 @@
     height: 100vh;
     overflow: hidden;
     margin: 0 auto;
+    background: #001f63;
 
     #sun {
         position: absolute;
         width: 21px;
         height: 21px;
         border-radius: 50%;
-        background: yellow;
+        background: orange;
         top: 390px;
         left: 390px;
         z-index: 1000;
@@ -25,10 +26,10 @@
     .orbit {
         position: absolute;
         border-radius: 50%;
-        border: 1px solid black;
+        border: 1px solid #FFF;
         box-sizing: border-box;
 
-        &#jupiter-orbit {
+        /*&#jupiter-orbit {
             z-index: 100;
             &:hover {
                 border: 3px solid black;
@@ -45,13 +46,20 @@
             &:hover {
                 border: 1px solid black;
             }
-        }
+        }*/
     }
 
 
     .planet {
         position: absolute;
         border-radius: 50%;
+    }
+    .asteroid {
+        border-radius: 50%;
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: gray;
     }
 /*--------------------------------------------------------------------------------------------------------------------*/
     #mercury {
@@ -75,7 +83,7 @@
         z-index: 41;
     }
     #jupiter {
-        background: url('../img/jup.png') no-repeat;
+        background: url('../img/jupiter.png') no-repeat;
         background-size: cover;
         z-index: 11;
     }
@@ -88,15 +96,17 @@
         z-index: 41;
     }
     #saturn {
-        background: #ffb25c;
+        background: url('../img/saturn.png') no-repeat;
+        background-size: cover;
         z-index: 11;
     }
     #uran {
         background: #ffb25c;
         z-index: 11;
     }
-    #neptun {
-        background: #ffb25c;
+    #neptune {
+        background: url('../img/neptune.png') no-repeat;
+        background-size: cover;
         z-index: 11;
     }
     #pluto {

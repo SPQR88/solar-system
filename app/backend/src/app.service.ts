@@ -74,7 +74,7 @@ export class AppService {
         selector: `saturn`,
         orbit: 958,
         speed: 0.034,
-        radius: 5,
+        radius: 20,
         degree: 0,
         radian: 0
       },
@@ -90,7 +90,7 @@ export class AppService {
         selector: `neptune`,
         orbit: 3005,
         speed: 0.006,
-        radius: 5,
+        radius: 10,
         degree: 0,
         radian: 0
       },
