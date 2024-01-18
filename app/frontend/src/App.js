@@ -6,14 +6,27 @@ import './css/style.css';
 function App() {
   const [scale, setScale] = useState(10);
   const [asteroids, setAsteroids] = useState([]);
+  const [planets, setPlanets] = useState([]);
 
   const scaleRef = useRef(scale);
   const asteroidsRef = useRef(asteroids);
 
   useEffect(() => {
-    init();
-    createAsteroids();
-    setInterval(intervalFunc, 10);
+    const fetchPlanets = async () => {
+      try {
+        const response = await fetch('http://localhost:3000');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(`get data: ${data}`);
+        setPlanets(data);
+      } catch (e) {
+        // setError(e.message);
+      }
+    };
+
+    fetchPlanets();
   }, []);
 
   useEffect(() => {
@@ -24,121 +37,23 @@ function App() {
     updateAsteroids();
   }, [scale]);
 
+  useEffect(() => {
+    console.log(`use effect for planets`, planets);
+    if (planets.length) {
+      init();
+      createAsteroids();
+      setInterval(intervalFunc, 10);
+    }
+  }, [planets]);
+
   const sun = {
     x: 400,
     y: 400,
     radius: 10
   }
 
-  let mercury = {
-      selector: `mercury`,
-      orbit: 39,
-      speed: 4.17,
-      radius: 5,
-      degree: 0,
-      radian: 0
-  }
-
-  let venus = {
-      selector: `venus`,
-      orbit: 72,
-      speed: 1.61,
-      radius: 5,
-      degree: 0,
-      radian: 0
-  }
-
-  let earth = {
-      selector: `earth`,
-      orbit: 100, // 1 ae
-      speed: 1,
-      radius: 5,
-      degree: 0,
-      radian: 0,
-      moons: [{
-          selector: 'moon',
-          orbit: 10,
-          speed: 12,
-          radius: 3,
-          degree: 0,
-          radian: 0
-      }]
-  }
-
-  let mars = {
-      selector: `mars`,
-      orbit: 152,
-      speed: 0.53,
-      radius: 5,
-      degree: 0,
-      radian: 0
-  }
-
-  let jupiter = {
-      selector: `jupiter`,
-      orbit: 520,
-      speed: 0.08,
-      radius: 20,
-      degree: 0,
-      radian: 0,
-      moons: [
-          {
-              selector: 'io',
-              orbit: 50,
-              speed: 6,
-              radius: 3,
-              degree: 0,
-              radian: 0
-          },
-          {
-              selector: 'europe',
-              orbit: 70,
-              speed: 3,
-              radius: 3,
-              degree: 0,
-              radian: 0
-          },
-      ]
-  }
-  let saturn = {
-      selector: `saturn`,
-      orbit: 958,
-      speed: 0.034,
-      radius: 5,
-      degree: 0,
-      radian: 0
-  }
-  let uran = {
-      selector: `uran`,
-      orbit: 1922,
-      speed: 0.012,
-      radius: 5,
-      degree: 0,
-      radian: 0
-  }
-  let neptun = {
-      selector: `neptun`,
-      orbit: 3005,
-      speed: 0.006,
-      radius: 5,
-      degree: 0,
-      radian: 0
-  }
-  let pluto = {
-      selector: `pluto`,
-      a: 3950,
-      b: 3827,
-      c: 948,
-      orbit: 3005,
-      speed: 1,
-      radius: 5,
-      degree: 0,
-      radian: 0
-  }
-
-  let planets = [mercury, venus, earth, mars, jupiter, saturn, uran, neptun, pluto];
-
   const init = () => {
+    console.log(`init: ${planets}`);
     sun.x = parseInt(document.querySelector('#container').offsetWidth / 2);
     sun.y = parseInt(document.querySelector('#container').offsetHeight / 2);
     document.querySelector(`#sun`).style.top = Math.floor(sun.y - sun.radius) + 'px';
@@ -313,11 +228,11 @@ function App() {
       <div id="saturn-orbit"  className="orbit"></div>
       <div id="saturn" className="planet"></div>
 
-      <div id="uran-orbit"  className="orbit"></div>
-      <div id="uran" className="planet"></div>
+      <div id="uranus-orbit"  className="orbit"></div>
+      <div id="uranus" className="planet"></div>
 
-      <div id="neptun-orbit"  className="orbit"></div>
-      <div id="neptun" className="planet"></div>
+      <div id="neptune-orbit"  className="orbit"></div>
+      <div id="neptune" className="planet"></div>
 
       <div id="pluto-orbit"  className="orbit"></div>
       <div id="pluto" className="planet"></div>
