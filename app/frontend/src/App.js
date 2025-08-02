@@ -1,238 +1,173 @@
-// import logo from './logo.svg';
 import React, { useEffect, useState, useRef } from 'react';
 import './App.css';
 import './css/style.css';
+import Planet from './components/Planet';
+import Orbit from './components/Orbit';
+import Asteroid from './components/Asteroid';
 
 function App() {
   const defaultScale = 30;
-  const [scale, setScale] = useState(30);
-  const [asteroids, setAsteroids] = useState([]);
+  const minScale = 1;
+  const maxScale = 50;
+
+  const [scale, setScale] = useState(defaultScale);
   const [planets, setPlanets] = useState([]);
+  const [sun, setSun] = useState({ x: 0, y: 0, radius: 10 });
+  const [asteroids, setAsteroids] = useState([]);
 
-  const scaleRef = useRef(scale);
-  const asteroidsRef = useRef(asteroids);
+  const containerRef = useRef(null);
 
+  // sun
+  useEffect(() => {
+    const container = containerRef.current;
+    const centerX = container.offsetWidth / 2;
+    const centerY = container.offsetHeight / 2;
+    setSun(prev => ({ ...prev, x: centerX, y: centerY }));
+  }, []);
+
+  // init request
   useEffect(() => {
     const fetchPlanets = async () => {
       try {
-        const response = await fetch('http://localhost:3000');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch('http://localhost:3000/planets');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log(`get data: ${data}`);
-        setPlanets(data);
+
+        const initialized = data.map(planet => ({
+          ...planet,
+          degree: planet.degree ?? 0,
+          radian: 0,
+          x: 0,
+          y: 0,
+        }));
+
+        setPlanets(initialized);
       } catch (e) {
-        // setError(e.message);
+        console.error('Fetch error:', e);
       }
     };
 
     fetchPlanets();
   }, []);
 
+  // planets
   useEffect(() => {
-    // console.log(`change scale ${scale}`);
-    scaleRef.current = scale;
-    asteroidsRef.current = asteroids; 
-    init();
-    updateAsteroids();
+    console.log(`scale ${scale}`);
+    let frameId;
+
+    const animate = () => {
+      setPlanets(prevPlanets =>
+        prevPlanets.map(planet => {
+          const degree = planet.degree + planet.speed;
+          const radian = degree * Math.PI / 180;
+
+          const x = sun.x + (planet.a ?? planet.orbit) * Math.cos(radian) * scale / defaultScale
+            + (planet.c ? planet.c * scale / defaultScale : 0);
+          const y = sun.y - (planet.b ?? planet.orbit) * Math.sin(radian) * scale / defaultScale;
+
+          // обновляем луны
+          const moons = planet.moons?.map(moon => {
+            const moonDegree = moon.degree + moon.speed;
+            const moonRadian = moonDegree * Math.PI / 180;
+
+            const moonX = x + moon.orbit * Math.cos(moonRadian) * scale / defaultScale;
+            const moonY = y - moon.orbit * Math.sin(moonRadian) * scale / defaultScale;
+
+            return { ...moon, degree: moonDegree, radian: moonRadian, x: moonX, y: moonY };
+          });
+
+          return { ...planet, degree, radian, x, y, moons };
+        })
+      );
+
+      frameId = requestAnimationFrame(animate);
+    };
+
+    if (planets.length) frameId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [planets.length, scale, sun]);
+
+  // scale
+  useEffect(() => {
+    const handleScroll = event => {
+      let newScale = scale;
+      const delta = event.deltaY;
+
+      newScale = delta > 0 ? newScale - 1 : newScale + 1;
+      newScale = Math.min(Math.max(minScale, newScale), maxScale);
+
+      setScale(newScale);
+    };
+
+    window.addEventListener('wheel', handleScroll);
+
+    return () => window.removeEventListener('wheel', handleScroll);
   }, [scale]);
 
+  // asteroids
   useEffect(() => {
-    console.log(`use effect for planets`, planets);
-    if (planets.length) {
-      init();
-      createAsteroids();
-      setInterval(intervalFunc, 10);
-    }
-  }, [planets]);
+    if (!sun.x || !sun.y) return;
 
-  const sun = {
-    selector: 'sun',
-    x: 400,
-    y: 400,
-    radius: 10
-  }
+    const newAsteroids = [];
 
-  const setPosition = (item, x, y) => {
-    document.querySelector(`#${item.selector}`).style.left = x - item.radius + 'px';
-    document.querySelector(`#${item.selector}`).style.top  = y - item.radius + 'px';
-  };
-  const setSize = (item) => {
-    document.querySelector(`#${item.selector}`).style.width = item.radius * 2 + 1 + 'px';
-    document.querySelector(`#${item.selector}`).style.height = item.radius * 2 + 1 + 'px';
-  };
-
-  const init = () => {
-    console.log(`init: ${planets}`);
-    sun.x = parseInt(document.querySelector('#container').offsetWidth / 2);
-    sun.y = parseInt(document.querySelector('#container').offsetHeight / 2);
-    setSize(sun);
-    setPosition(sun, sun.x, sun.y);
-
-    planets.forEach((item, key) => {
-        let planetOrbit = document.querySelector(`#${item.selector}-orbit`);
-
-        setSize(item);
-        if (item.moons) {
-          item.moons.forEach((moon) => {
-            setSize(moon);
-          });
-        }
-
-        let orbit = Math.round(item.orbit * scale / defaultScale);
-        planetOrbit.style.top = parseInt(sun.y - orbit) + 'px'
-        planetOrbit.style.left = parseInt(sun.x - orbit) + 'px'
-        planetOrbit.style.width = parseInt(orbit * 2 + 1) + 'px'
-        planetOrbit.style.height = parseInt(orbit * 2 + 1) + 'px'
-    });
-  }
-
-  const intervalFunc = function() {
-    const scale = scaleRef.current;
-    planets.forEach((item) => {
-      let planet = document.querySelector(`#${item.selector}`);
-
-      item.degree += item.speed;
-      item.radian = item.degree * Math.PI / 180;
-
-      if (item.a && item.b && item.c) {
-        const posX = Math.round(sun.x + item.a * Math.cos(item.radian) * scale / defaultScale + item.c * scale / defaultScale);
-        const posY =  Math.round(sun.y - item.b * Math.sin(item.radian) * scale / defaultScale);
-        planet.style.left = posX - item.radius + 'px';
-        planet.style.top  = posY - item.radius + 'px';
-      } else {
-        const posX = Math.round(sun.x + item.orbit * Math.cos(item.radian) * scale / defaultScale);
-        const posY = Math.round(sun.y - item.orbit * Math.sin(item.radian) * scale / defaultScale);
-        setPosition(item, posX, posY);
-
-        if (item.moons) {
-          item.moons.forEach((moon) => {
-            moon.degree += moon.speed;
-            moon.radian = moon.degree * Math.PI / 180;
-
-            setPosition(moon,
-              Math.round(posX + moon.orbit * Math.cos(moon.radian) * scale / defaultScale),
-              Math.round(posY - moon.orbit * Math.sin(moon.radian) * scale / defaultScale)
-            );
-          });
-        }
-      }
-    });
-  };
-
-  function createAsteroids() {
-    console.log(`create asteroids`);
-    const asteroids = [];
     for (let i = 0; i < 360; i++) {
-        for (let j = 0; j < 1; j++) {
-            // Рандомное расстояние от 210 до 330 пикселей
-            const distance = Math.random() * (330 - 210) + 210;
+      const angle = Math.PI * i / 180;
+      const distance = Math.random() * (330 - 210) + 210;
 
-            // Рассчитываем координаты x и y астероида
-            const x = sun.x + Math.floor(distance * Math.cos(Math.PI * i / 180) * scale / defaultScale);
-            const y = sun.y - Math.floor(distance * Math.sin(Math.PI * i / 180) * scale / defaultScale);
-            asteroids.push({i, j, distance});
+      const x = sun.x + distance * Math.cos(angle) * scale / defaultScale;
+      const y = sun.y - distance * Math.sin(angle) * scale / defaultScale;
 
-            const asteroid = document.createElement('div');
-            asteroid.id = 'asteroid-' + i + '-' + j;
-            asteroid.className = 'asteroid';
-            asteroid.style.left = `${x}px`;
-            asteroid.style.top = `${y}px`;
-
-            // Добавляем астероид на страницу
-            document.querySelector('#container').appendChild(asteroid);
-        }
+      newAsteroids.push({
+        id: `asteroid-${i}`,
+        angle,
+        distance,
+        x,
+        y,
+      });
     }
 
-    setAsteroids(asteroids);
-  }
-
-  function updateAsteroids() {
-    const scale = scaleRef.current;
-    const asteroids = asteroidsRef.current;
-    // console.log(`update asteroids: ${scale}`);
-    // console.log(asteroids);
-    for (const asteroid of asteroids) {
-      let obj = document.querySelector(`#asteroid-${asteroid.i}-${asteroid.j}`);
-
-      /*if (scale <= 3) {
-          if (asteroid.j === 0) {
-              const x = Math.floor(sun.x + asteroid.distance * Math.cos(asteroid.i * Math.PI / 180) * scale / 10);
-              const y = Math.floor(sun.y - asteroid.distance * Math.sin(asteroid.i * Math.PI / 180) * scale / 10);
-              obj.style.left = `${x}px`;
-              obj.style.top = `${y}px`;
-          } else {
-              obj.style.display  = 'none';
-          }
-      } else {*/
-          obj.style.display  = 'block';
-          const x = Math.floor(sun.x + asteroid.distance * Math.cos(asteroid.i * Math.PI / 180) * scale / defaultScale);
-          const y = Math.floor(sun.y - asteroid.distance * Math.sin(asteroid.i * Math.PI / 180) * scale / defaultScale);
-          obj.style.left = `${x}px`;
-          obj.style.top = `${y}px`;
-      // }
-    }
-  }
-
-  function handleScroll(event) {
-    // Предотвращение стандартной прокрутки страницы
-    // event.preventDefault();
-
-    let scaleLocal = scale;
-    // Определение направления прокрутки
-    const delta = event.deltaY;
-
-    // Изменение масштаба
-    // Уменьшение масштаба при прокрутке вниз, увеличение - при прокрутке вверх
-    if (delta > 0) {
-      scaleLocal -= +1;
-    } else {
-      scaleLocal += +1;
-    }
-
-    // Ограничение масштаба, чтобы он не стал слишком большим или маленьким
-    scaleLocal = Math.min(Math.max(1, scaleLocal), 40);
-
-    setScale(scaleLocal);
-  }
-
-  // Добавление обработчика событий прокрутки к элементу или окну
-  window.addEventListener('wheel', handleScroll);
+    setAsteroids(newAsteroids);
+  }, [sun, scale]);
 
   return (
-    <div id="container">
-      <div id="sun"></div>
+    <div id="container" ref={containerRef}>
+      {asteroids.map(a => (
+        <Asteroid key={a.id} id={a.id} position={{ x: a.x, y: a.y }} />
+      ))}
 
-      <div id="mercury-orbit" className="orbit"></div>
-      <div id="mercury" className="planet"></div>
+      <div
+        id="sun"
+        style={{
+          position: 'absolute',
+          width: sun.radius * 2 + 1,
+          height: sun.radius * 2 + 1,
+          left: sun.x - sun.radius,
+          top: sun.y - sun.radius,
+        }}
+      />
 
-      <div id="venus-orbit" className="orbit"></div>
-      <div id="venus" className="planet"></div>
-      
-      <div id="earth-orbit"  className="orbit"></div>
-      <div id="earth" className="planet"></div>
-          <div id="moon" className="planet"></div>
-
-      <div id="mars-orbit"  className="orbit"></div>
-      <div id="mars" className="planet"></div>
-
-      <div id="jupiter-orbit"  className="orbit"><div></div></div>
-      <div id="jupiter" className="planet"></div>
-          <div id="io" className="planet"></div>
-          <div id="europe" className="planet"></div>
-      
-      <div id="saturn-orbit"  className="orbit"></div>
-      <div id="saturn" className="planet"></div>
-
-      <div id="uranus-orbit"  className="orbit"></div>
-      <div id="uranus" className="planet"></div>
-
-      <div id="neptune-orbit"  className="orbit"></div>
-      <div id="neptune" className="planet"></div>
-
-      <div id="pluto-orbit"  className="orbit"></div>
-      <div id="pluto" className="planet"></div>
+      {planets.map(planet => (
+        <React.Fragment key={planet.selector}>
+          <Orbit
+            id={`${planet.selector}-orbit`}
+            center={{ x: sun.x, y: sun.y }}
+            radius={planet.orbit * scale / defaultScale}
+          />
+          <Planet
+            id={planet.selector}
+            radius={planet.radius}
+            position={{ x: planet.x ?? 0, y: planet.y ?? 0 }}
+          />
+          {planet.moons?.map(moon => (
+            <Planet
+              id={moon.selector}
+              radius={moon.radius}
+              position={{ x: moon.x ?? 0, y: moon.y ?? 0 }}
+            />
+        ))}
+        </React.Fragment>
+      ))}
     </div>
   );
 }
