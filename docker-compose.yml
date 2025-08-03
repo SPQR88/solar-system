@@ -12,26 +12,19 @@ services:
       - NODE_ENV=development
     volumes:
       - ./backend:/app
+    expose:
+      - "3000:3000"
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: .ci/Dockerfile
-  #   container_name: react-builder
-  #   volumes:
-  #     - ./frontend/build:/app/build
-  #   depends_on:
-  #     - backend
-
-  nginx:
+  frontend:
     build:
       context: ./frontend
       dockerfile: .ci/Dockerfile
-    container_name: nginx-server
-    volumes:
-      - ./frontend/.ci/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    container_name: react-frontend
     ports:
-      - '80:80'
+      - '3001:80'
     depends_on:
       - backend
 
