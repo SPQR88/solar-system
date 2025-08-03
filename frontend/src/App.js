@@ -29,7 +29,8 @@ function App() {
   useEffect(() => {
     const fetchPlanets = async () => {
       try {
-        const response = await fetch('http://localhost:3000/planets');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/planets`);
+
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
 
