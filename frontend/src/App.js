@@ -53,7 +53,6 @@ function App() {
 
   // planets
   useEffect(() => {
-    console.log(`scale ${scale}`);
     let frameId;
 
     const animate = () => {
@@ -66,7 +65,7 @@ function App() {
             + (planet.c ? planet.c * scale / defaultScale : 0);
           const y = sun.y - (planet.b ?? planet.orbit) * Math.sin(radian) * scale / defaultScale;
 
-          // обновляем луны
+          // moons
           const moons = planet.moons?.map(moon => {
             const moonDegree = moon.degree + moon.speed;
             const moonRadian = moonDegree * Math.PI / 180;
