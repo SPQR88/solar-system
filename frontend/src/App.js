@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import './App.css';
-import './css/style.css';
+// import './App.css';
+// import './css/style.css';
 import Planet from './components/Planet';
 import Orbit from './components/Orbit';
 import Asteroid from './components/Asteroid';

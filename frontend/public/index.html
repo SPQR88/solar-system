@@ -25,6 +25,10 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Solar System</title>
+
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}#container{position:relative;width:100vw;height:100vh;overflow:hidden;margin:0 auto;background:#001f63}#container #sun{position:absolute;width:21px;height:21px;border-radius:50%;background:orange;top:390px;left:390px;z-index:1000}#container .orbit{position:absolute;border-radius:50%;border:1px solid #FFF;box-sizing:border-box}#container .planet{position:absolute;border-radius:50%}#container .asteroid{border-radius:50%;position:absolute;width:4px;height:4px;background:gray}#container #mercury{background:orange;z-index:41}#container #venus{background:gray;z-index:41}#container #earth{background:#00f;z-index:41}#container #moon{background:gray;z-index:41}#container #mars{background:red;z-index:41}#container #jupiter{background:url(./img/jupiter.png) no-repeat;background-size:cover;z-index:11}#container #europe,#container #io{background:gray;z-index:41}#container #saturn{background:url(./img/saturn.png) no-repeat;background-size:cover;z-index:11}#container #uran{background:#ffb25c;z-index:11}#container #neptune{background:url(./img/neptune.png) no-repeat;background-size:cover;z-index:11}#container #pluto{background:#ffb25c;z-index:11}
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
